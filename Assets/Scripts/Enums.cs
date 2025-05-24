@@ -80,13 +80,4 @@ namespace UnequalOdds.GameData {
         MigrantWorker,
         RefugeeAsylumSeeker
     }
-
-    public enum LifeGoal
-    {
-        LivableJob,
-        SafeHousing,
-        MaintainHealth,
-        FinancialCushion,
-        CivicVoice
-    }
 }
