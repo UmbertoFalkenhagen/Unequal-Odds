@@ -16,6 +16,7 @@ using UnityEngine.UI;
 using UnequalOdds.GameData;
 using UnequalOdds.Gameplay;
 using UnequalOdds.Runtime;
+using System.Collections;
 
 namespace UnequalOdds.UI
 {
@@ -33,6 +34,9 @@ namespace UnequalOdds.UI
         [SerializeField] private Button firstLangBtn;
         [SerializeField] private Button migrationBtn;
 
+        [Header("Start Game")]
+        [SerializeField] private Button startGameButton;        // hidden until all revealed
+
         [Header("Scene flow")]
         [SerializeField] private string coreSceneName = "CoreGameplay";
 
@@ -40,6 +44,7 @@ namespace UnequalOdds.UI
         private PlayerProfile profile;
         private readonly HashSet<Button> revealedButtons = new HashSet<Button>();
         private const int totalButtons = 10;
+        private bool isStarting = false;
 
         // ---------------------------------------------------------------------
         private void Awake()
@@ -68,6 +73,18 @@ namespace UnequalOdds.UI
                 Reveal(firstLangBtn, profile.firstLang.ToString()));
             migrationBtn.onClick.AddListener(() =>
                 Reveal(migrationBtn, profile.migrationStatus.ToString()));
+
+            // Start Game button setup
+            if (startGameButton != null)
+            {
+                startGameButton.gameObject.SetActive(false); // hidden at start
+                startGameButton.onClick.RemoveAllListeners();
+                startGameButton.onClick.AddListener(ContinueToGame);
+            }
+            else
+            {
+                Debug.LogWarning("ProfileRevealUI: StartGameButton is not assigned.");
+            }
         }
 
         // ---------------------------------------------------------------------
@@ -88,17 +105,53 @@ namespace UnequalOdds.UI
             // Track reveal.
             revealedButtons.Add(btn);
 
-            // Check completion.
-            if (revealedButtons.Count >= totalButtons)
-                ContinueToGame();
+            // If all revealed, show Start Game button instead of auto-loading.
+            if (revealedButtons.Count >= totalButtons && startGameButton != null)
+            {
+                startGameButton.gameObject.SetActive(true);
+                startGameButton.interactable = true;
+            }
         }
 
         private void ContinueToGame()
         {
-            // Persist profile for the next scene.
+            if (isStarting) return;
+            isStarting = true;
+
+            // Persist profile now so it's ready when the next scene starts.
+            if (GameState.Instance == null)
+            {
+                Debug.LogError("GameState singleton missing in scene. Add GameState object before continuing.");
+                isStarting = false;
+                return;
+            }
             GameState.Instance.CurrentProfile = profile;
 
-            // Load the core gameplay scene (must be in Build Settings).
+            // Start the countdown coroutine.
+            StartCoroutine(StartGameCountdown());
+        }
+
+        private IEnumerator StartGameCountdown()
+        {
+            if (startGameButton == null)
+            {
+                // Fallback: no button assigned, just load.
+                SceneManager.LoadScene(coreSceneName);
+                yield break;
+            }
+
+            var label = startGameButton.GetComponentInChildren<TextMeshProUGUI>();
+            startGameButton.interactable = false;
+
+            for (int i = 3; i >= 1; i--)
+            {
+                if (label != null) label.text = $"Starting in {i}…";
+                yield return new WaitForSecondsRealtime(1f);
+            }
+
+            // Optional: brief "Starting..." flash
+            if (label != null) label.text = "Starting…";
+
             SceneManager.LoadScene(coreSceneName);
         }
     }
