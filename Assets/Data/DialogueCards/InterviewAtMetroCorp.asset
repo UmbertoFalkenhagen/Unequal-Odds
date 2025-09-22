@@ -14,8 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   goal: 0
   cardTitle: Job Interview at MetroCorp
-  cardBody: "You\u2019ve made it to the interview round. The office is in the city
-    center at 9:00 AM. You need to maximize your chance of receiving the offer."
+  cardBody: You step off the bus into a river of suits. Elevators ping. Your name
+    is on the visitor badge, but the clock is, too. One last conversation stands
+    between you and an offer - or will it be a rejection?
   baseTarget: 4
   options:
   - text: Leverage an alumni referral
@@ -24,8 +25,16 @@ MonoBehaviour:
       isGroup: 1
       groupOp: 1
       children:
-      - rid: 8582817961593012224
-      - rid: 8582817961593012225
+      - isGroup: 0
+        groupOp: 0
+        children: []
+        attribute: 8
+        allowedMask: 4
+      - isGroup: 0
+        groupOp: 0
+        children: []
+        attribute: 1
+        allowedMask: 4
       attribute: 0
       allowedMask: 0
     rollBonus: 0
@@ -48,14 +57,22 @@ MonoBehaviour:
       isGroup: 0
       groupOp: 1
       children:
-      - rid: 8582817961593012226
-      - rid: 8582817961593012227
+      - isGroup: 0
+        groupOp: 0
+        children: []
+        attribute: 0
+        allowedMask: 0
+      - isGroup: 0
+        groupOp: 0
+        children: []
+        attribute: 0
+        allowedMask: 0
       attribute: 3
       allowedMask: 6
     rollBonus: 0
     targetShift: 1
     forcedDrawback: 0
-  - text: Access building without accommodation
+  - text: Access hurdles at the building
     kind: 1
     gate:
       isGroup: 0
@@ -77,38 +94,3 @@ MonoBehaviour:
     rollBonus: 0
     targetShift: -1
     forcedDrawback: 0
-  references:
-    version: 2
-    RefIds:
-    - rid: 8582817961593012224
-      type: {class: GateCondition, ns: UnequalOdds.GameData, asm: Assembly-CSharp}
-      data:
-        isGroup: 0
-        groupOp: 0
-        children: []
-        attribute: 8
-        allowedMask: 4
-    - rid: 8582817961593012225
-      type: {class: GateCondition, ns: UnequalOdds.GameData, asm: Assembly-CSharp}
-      data:
-        isGroup: 0
-        groupOp: 0
-        children: []
-        attribute: 1
-        allowedMask: 4
-    - rid: 8582817961593012226
-      type: {class: GateCondition, ns: UnequalOdds.GameData, asm: Assembly-CSharp}
-      data:
-        isGroup: 0
-        groupOp: 0
-        children: []
-        attribute: 3
-        allowedMask: 2
-    - rid: 8582817961593012227
-      type: {class: GateCondition, ns: UnequalOdds.GameData, asm: Assembly-CSharp}
-      data:
-        isGroup: 0
-        groupOp: 0
-        children: []
-        attribute: 3
-        allowedMask: 1

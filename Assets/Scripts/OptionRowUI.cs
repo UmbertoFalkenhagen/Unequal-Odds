@@ -70,6 +70,7 @@ namespace UnequalOdds.UI
             Option = option;
             HasBackground = hasBackground;
 
+
             if (label) label.text = option?.text ?? "(missing text)";
 
             // baseline
@@ -107,6 +108,8 @@ namespace UnequalOdds.UI
                 if (HasBackground) SetState(RowState.PrivilegeAvailable);
                 else SetState(RowState.PrivilegeUnavailable);
             }
+
+
         }
 
         public void SetInteractable(bool interactable)

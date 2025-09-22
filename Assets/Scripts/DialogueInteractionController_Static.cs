@@ -6,6 +6,8 @@ using UnequalOdds.GameData;
 using UnequalOdds.Gameplay;
 using UnequalOdds.Runtime;   // for TurnLogEntry / LoggedOption (safe to keep even if unused)
 using UnequalOdds.UI;        // OptionRowUI
+using System.Collections.Generic;
+using UnequalOdds.GameData;
 
 public class DialogueInteractionController_Static : MonoBehaviour
 {
@@ -34,8 +36,14 @@ public class DialogueInteractionController_Static : MonoBehaviour
     [SerializeField] private OptionRowUI OptionSlot_4;
     [SerializeField] private OptionRowUI OptionSlot_5;
 
-    [Header("Data Source")]
+    // Serialized master list (assign in Inspector)
     [SerializeField] private List<DialogueCard> allCards = new List<DialogueCard>();
+
+    // Runtime pools: a separate copy for each goal
+    private readonly Dictionary<LifeGoal, List<DialogueCard>> _remainingByGoal = new();
+
+    // Track which index we drew from (so we can remove on success)
+    private int _currentIndexInPool = -1;
 
     [Header("Colors")]
     [SerializeField] private Color baseGrey = new Color(0.55f, 0.55f, 0.55f, 1f);
@@ -65,11 +73,26 @@ public class DialogueInteractionController_Static : MonoBehaviour
     private void Start()
     {
         profile = GameState.Instance != null ? GameState.Instance.CurrentProfile : ProfileFactory.CreateRandom();
+        BuildPoolsOnce();
     }
 
-    public void SetCardPool(List<DialogueCard> cards) => allCards = cards;
+    public void SetCardPool(List<DialogueCard> cards)
+    {
+        allCards = (cards != null) ? new List<DialogueCard>(cards) : new List<DialogueCard>();
+        BuildPoolsOnce();
+    }
 
-    /// <summary>Called by your Life Goal selection to present a random card from the current pool.</summary>
+    private void BuildPoolsOnce()
+    {
+        _remainingByGoal.Clear();
+        foreach (LifeGoal g in System.Enum.GetValues(typeof(LifeGoal)))
+            _remainingByGoal[g] = new List<DialogueCard>(8);
+
+        // COPY into per-goal lists; do not reuse the same list reference
+        foreach (var c in allCards)
+            if (c != null) _remainingByGoal[c.goal].Add(c);
+    }
+
     public void PresentRandomCard(LifeGoal goal, int turnIndex = 0, int turnsTotal = 10)
     {
         currentTurnIndex = turnIndex;
@@ -78,21 +101,24 @@ public class DialogueInteractionController_Static : MonoBehaviour
         if (TurnCounter) TurnCounter.text = $"Turn {turnIndex + 1} / {turnsTotal}";
         if (Header) Header.text = $"Life Goal: {goal}";
 
-        // draw random card from current pool
-        var pool = allCards.FindAll(c => c.goal == goal);
-        if (pool.Count == 0)
+        // draw random card from the per-goal pool
+        currentCard = DrawRandomCard(goal);
+        if (currentCard == null)
         {
-            Debug.LogWarning($"No DialogueCards available for goal {goal}.");
+            Debug.Log($"No DialogueCards remaining for goal {goal}.");
+            // Optional: show a small message in the UI and disable Roll button
+            if (DialogueCardName_Text) DialogueCardName_Text.text = "No cards left for this goal";
+            if (DialogueCardBody_Text) DialogueCardBody_Text.text = "Pick a different life goal.";
+            if (Btn_RollDie) Btn_RollDie.interactable = false;
             return;
         }
-        currentCard = pool[Random.Range(0, pool.Count)];
 
         if (DialogueCardName_Text) DialogueCardName_Text.text = currentCard.cardTitle;
         if (DialogueCardBody_Text) DialogueCardBody_Text.text = currentCard.cardBody;
 
         if (Box_BaseTarget)
         {
-            Box_BaseTarget.text = $"Base Target: ? {currentCard.baseTarget}";
+            Box_BaseTarget.text = $"Base Target: {currentCard.baseTarget}";
             Box_BaseTarget.color = baseGrey;
         }
 
@@ -103,6 +129,19 @@ public class DialogueInteractionController_Static : MonoBehaviour
 
         if (Box_RollResult) Box_RollResult.text = string.Empty;
         RecomputeSummary();
+    }
+
+
+    private DialogueCard DrawRandomCard(LifeGoal goal)
+    {
+        if (!_remainingByGoal.TryGetValue(goal, out var pool) || pool == null || pool.Count == 0)
+        {
+            _currentIndexInPool = -1;
+            return null;
+        }
+
+        _currentIndexInPool = UnityEngine.Random.Range(0, pool.Count);
+        return pool[_currentIndexInPool];
     }
 
     private void BindOptionsToFiveSlots()
@@ -253,8 +292,25 @@ public class DialogueInteractionController_Static : MonoBehaviour
         foreach (var slot in slots)
             if (slot != null) slot.SetInteractable(false);
 
+        RemoveCurrentCardIfSucceeded(success);
         // 5s outcome message ? 3s countdown ? signal GameFlow to return
         StartCoroutine(OutcomeSequence(success));
+    }
+
+    private void RemoveCurrentCardIfSucceeded(bool success)
+    {
+        if (!success || currentCard == null) { _currentIndexInPool = -1; return; }
+
+        if (_remainingByGoal.TryGetValue(currentCard.goal, out var pool)
+            && pool != null
+            && _currentIndexInPool >= 0
+            && _currentIndexInPool < pool.Count
+            && ReferenceEquals(pool[_currentIndexInPool], currentCard))
+        {
+            pool.RemoveAt(_currentIndexInPool);
+        }
+
+        _currentIndexInPool = -1;
     }
 
     private System.Collections.IEnumerator OutcomeSequence(bool success)

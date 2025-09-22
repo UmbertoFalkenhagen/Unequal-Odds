@@ -13,42 +13,35 @@ public class GateConditionDrawer : PropertyDrawer
         if (prop == null) return EditorGUIUtility.singleLineHeight;
 
         var isGroupProp = prop.FindPropertyRelative("isGroup");
-        if (isGroupProp == null)
-            return EditorGUIUtility.singleLineHeight * 2f; // minimal help
+        if (isGroupProp == null) return EditorGUIUtility.singleLineHeight * 2f;
 
         bool isGroup = isGroupProp.boolValue;
 
         if (!isGroup)
         {
-            // leaf: Group toggle + attribute + (maybe) mask
+            // leaf: toggle + attribute + (maybe) mask
             var attrProp = prop.FindPropertyRelative("attribute");
             float lines = 2f; // toggle + attribute
             if (attrProp != null && (AttributeKey)attrProp.enumValueIndex != AttributeKey.None)
-                lines += 1f; // mask line
+                lines += 1f;   // mask
             return EditorGUIUtility.singleLineHeight * (lines + 0.5f);
         }
 
-        // group: Group toggle + operator + each child + +/- buttons
+        // group: toggle + operator + each child + +/- row
         var childrenProp = prop.FindPropertyRelative("children");
         float h = EditorGUIUtility.singleLineHeight * 2.5f; // toggle + op
+
         if (childrenProp != null)
         {
             for (int i = 0; i < childrenProp.arraySize; i++)
             {
                 var childProp = childrenProp.GetArrayElementAtIndex(i);
-                // if child is null managed ref, reserve one line for the "null child" UI
-                if (childProp == null || string.IsNullOrEmpty(childProp.managedReferenceFullTypename))
-                {
-                    h += EditorGUIUtility.singleLineHeight + 4f;
-                }
-                else
-                {
-                    // FIX: use EditorGUI.GetPropertyHeight(..., includeChildren)
-                    h += EditorGUI.GetPropertyHeight(childProp, true) + 4f;
-                }
+                float childHeight = EditorGUI.GetPropertyHeight(childProp, true);
+                h += childHeight + 4f;
             }
         }
-        h += EditorGUIUtility.singleLineHeight + 4f; // + / ? row
+
+        h += EditorGUIUtility.singleLineHeight + 4f; // +/- row
         return h;
     }
 
@@ -56,17 +49,16 @@ public class GateConditionDrawer : PropertyDrawer
     {
         if (prop == null)
         {
-            EditorGUI.HelpBox(rect, "Gate is null (no property).", MessageType.Warning);
+            EditorGUI.HelpBox(rect, "Gate is null.", MessageType.Warning);
             return;
         }
 
         EditorGUI.BeginProperty(rect, label, prop);
 
-        // line 1: group toggle
         var isGroupProp = prop.FindPropertyRelative("isGroup");
         if (isGroupProp == null)
         {
-            EditorGUI.HelpBox(rect, "Gate data missing (isGroup). Try re-creating the card option.", MessageType.Warning);
+            EditorGUI.HelpBox(rect, "Gate data missing (isGroup).", MessageType.Warning);
             EditorGUI.EndProperty();
             return;
         }
@@ -82,47 +74,27 @@ public class GateConditionDrawer : PropertyDrawer
         EditorGUI.EndProperty();
     }
 
-    // ------------------------ group node ------------------------
+    // ---------------- group node ----------------
     private void DrawGroup(Rect rect, SerializedProperty prop, Rect line)
     {
         var opProp = prop.FindPropertyRelative("groupOp");
         var childrenProp = prop.FindPropertyRelative("children");
 
-        // operator dropdown
+        // group operator
         line.y += EditorGUIUtility.singleLineHeight + 2f;
-        if (opProp != null)
-            EditorGUI.PropertyField(line, opProp);
-        else
-            EditorGUI.LabelField(line, "groupOp (missing)");
+        if (opProp != null) EditorGUI.PropertyField(line, opProp);
+        else EditorGUI.LabelField(line, "groupOp (missing)");
 
-        // children
+        // children list
         line.y += EditorGUIUtility.singleLineHeight + 4f;
         if (childrenProp != null)
         {
             for (int i = 0; i < childrenProp.arraySize; i++)
             {
                 var childProp = childrenProp.GetArrayElementAtIndex(i);
-                float childHeight = childProp != null && !string.IsNullOrEmpty(childProp.managedReferenceFullTypename)
-                    ? EditorGUI.GetPropertyHeight(childProp, true)   // FIX here too
-                    : EditorGUIUtility.singleLineHeight;
-
+                float childHeight = EditorGUI.GetPropertyHeight(childProp, true);
                 Rect childRect = new Rect(line.x + INDENT, line.y, line.width - INDENT, childHeight);
-
-                if (childProp == null || string.IsNullOrEmpty(childProp.managedReferenceFullTypename))
-                {
-                    // Null managed reference entry: offer to create default
-                    EditorGUI.HelpBox(childRect, "Null child. Click 'Fix' to add a default gate.", MessageType.Info);
-                    Rect fixBtn = new Rect(childRect.xMax - 60f, childRect.y + 2f, 56f, EditorGUIUtility.singleLineHeight);
-                    if (GUI.Button(fixBtn, "Fix"))
-                    {
-                        EnsureChildExists(childrenProp, i);
-                    }
-                }
-                else
-                {
-                    EditorGUI.PropertyField(childRect, childProp, GUIContent.none, true);
-                }
-
+                EditorGUI.PropertyField(childRect, childProp, GUIContent.none, true);
                 line.y += childHeight + 4f;
             }
         }
@@ -136,8 +108,8 @@ public class GateConditionDrawer : PropertyDrawer
             if (childrenProp != null)
             {
                 int idx = childrenProp.arraySize;
-                childrenProp.arraySize = idx + 1;
-                EnsureChildExists(childrenProp, idx); // instantiate default GateCondition
+                childrenProp.InsertArrayElementAtIndex(idx); // adds a new element
+                InitChild(childrenProp.GetArrayElementAtIndex(idx)); // set defaults
             }
         }
 
@@ -145,22 +117,28 @@ public class GateConditionDrawer : PropertyDrawer
         {
             if (childrenProp != null && childrenProp.arraySize > 0)
             {
-                childrenProp.arraySize -= 1;
+                int last = childrenProp.arraySize - 1;
+                childrenProp.DeleteArrayElementAtIndex(last);
             }
         }
     }
 
-    private static void EnsureChildExists(SerializedProperty childrenProp, int index)
+    private static void InitChild(SerializedProperty child)
     {
-        var child = childrenProp.GetArrayElementAtIndex(index);
-        if (child != null && string.IsNullOrEmpty(child.managedReferenceFullTypename))
-        {
-            // Assign a default instance to the managed reference slot
-            child.managedReferenceValue = new GateCondition();
-        }
+        if (child == null) return;
+        var isGroupProp = child.FindPropertyRelative("isGroup");
+        var attrProp = child.FindPropertyRelative("attribute");
+        var maskProp = child.FindPropertyRelative("allowedMask");
+        var kidsProp = child.FindPropertyRelative("children");
+
+        if (isGroupProp != null) isGroupProp.boolValue = false;
+        if (attrProp != null) attrProp.enumValueIndex = (int)AttributeKey.None;
+        if (maskProp != null) maskProp.intValue = 0;
+        if (kidsProp != null) kidsProp.arraySize = 0;
+        // groupOp can stay default
     }
 
-    // ------------------------ leaf node ------------------------
+    // ---------------- leaf node ----------------
     private void DrawLeaf(Rect rect, SerializedProperty prop, Rect line)
     {
         var attrProp = prop.FindPropertyRelative("attribute");
@@ -168,23 +146,15 @@ public class GateConditionDrawer : PropertyDrawer
 
         // attribute dropdown
         line.y += EditorGUIUtility.singleLineHeight + 2f;
-        if (attrProp != null)
-            EditorGUI.PropertyField(line, attrProp);
-        else
-            EditorGUI.LabelField(line, "attribute (missing)");
-
-        if (attrProp == null) return;
+        if (attrProp != null) EditorGUI.PropertyField(line, attrProp);
+        else { EditorGUI.LabelField(line, "attribute (missing)"); return; }
 
         var key = (AttributeKey)attrProp.enumValueIndex;
         if (key == AttributeKey.None) return;
 
-        // enum mask
+        // enum mask as Flags
         line.y += EditorGUIUtility.singleLineHeight + 2f;
-        if (maskProp == null)
-        {
-            EditorGUI.LabelField(line, "allowedMask (missing)");
-            return;
-        }
+        if (maskProp == null) { EditorGUI.LabelField(line, "allowedMask (missing)"); return; }
 
         switch (key)
         {
@@ -218,8 +188,10 @@ public class GateConditionDrawer : PropertyDrawer
             case AttributeKey.MigrationCitizenshipStatus:
                 maskProp.intValue = (int)(MigrationCitizenshipStatus)EditorGUI.EnumFlagsField(line, (MigrationCitizenshipStatus)maskProp.intValue);
                 break;
+            default:
+                EditorGUI.LabelField(line, key.ToString());
+                break;
         }
-
     }
 }
 #endif

@@ -54,12 +54,12 @@ namespace UnequalOdds.GameData
     [Serializable]
     public class GateCondition
     {
-        public bool isGroup;
-        public LogicalOp groupOp;                   // AND / OR enum
-        public List<GateCondition> children;
+        public bool isGroup = false;
+        public LogicalOp groupOp = LogicalOp.And;   // or whatever your enum is
+        public List<GateCondition> children = new List<GateCondition>();
 
-        public AttributeKey attribute;              // leaf attribute
-        public int allowedMask;                     // bitmask of allowed enum flags
+        public AttributeKey attribute = AttributeKey.None;
+        public int allowedMask = 0;                     // bitmask of allowed enum flags
 
         public bool Evaluate(UnequalOdds.Gameplay.PlayerProfile p)
         {

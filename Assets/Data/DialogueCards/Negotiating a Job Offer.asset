@@ -1,0 +1,75 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4689a5e7c501b245b37f6a7c060c140, type: 3}
+  m_Name: Negotiating a Job Offer
+  m_EditorClassIdentifier: 
+  goal: 0
+  cardTitle: Negotiating a Job Offer
+  cardBody: "The recruiter smiles through the screen. \u201CAny questions about compensation?\u201D
+    Your mouth is dry. A number could set your course - or shut the door."
+  baseTarget: 5
+  options:
+  - text: Confident walk-away cushion
+    kind: 0
+    gate:
+      isGroup: 0
+      groupOp: 0
+      children: []
+      attribute: 1
+      allowedMask: 4
+    rollBonus: 0
+    targetShift: -1
+    forcedDrawback: 0
+  - text: Citizenship - no visa timing risk
+    kind: 0
+    gate:
+      isGroup: 0
+      groupOp: 0
+      children: []
+      attribute: 10
+      allowedMask: 1
+    rollBonus: 1
+    targetShift: 0
+    forcedDrawback: 0
+  - text: Bias in pay conversations
+    kind: 1
+    gate:
+      isGroup: 0
+      groupOp: 0
+      children: []
+      attribute: 5
+      allowedMask: 22
+    rollBonus: 0
+    targetShift: 1
+    forcedDrawback: 0
+  - text: Name-based screening stereotypes
+    kind: 1
+    gate:
+      isGroup: 0
+      groupOp: 0
+      children: []
+      attribute: 4
+      allowedMask: 2
+    rollBonus: -1
+    targetShift: 0
+    forcedDrawback: 0
+  - text: Mentor coaches talking points
+    kind: 0
+    gate:
+      isGroup: 0
+      groupOp: 0
+      children: []
+      attribute: 8
+      allowedMask: 4
+    rollBonus: 1
+    targetShift: 0
+    forcedDrawback: 0
