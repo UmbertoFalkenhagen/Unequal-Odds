@@ -14,6 +14,93 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   goal: 2
   cardTitle: 'Getting a Specialist Appointment '
-  cardBody: 
+  cardBody: "The receptionist says the calendar is \u201Ctight.\u201D The portal
+    refreshes like a heartbeat. You list symptoms, click submit, and hope the month
+    doesn\u2019t win."
   baseTarget: 4
-  options: []
+  options:
+  - text: 'Book private clinic slot '
+    kind: 0
+    gate:
+      isGroup: 0
+      groupOp: 0
+      children: []
+      attribute: 1
+      allowedMask: 4
+    rollBonus: 2
+    targetShift: 0
+    forcedDrawback: 0
+  - text: Provider density nearby
+    kind: 0
+    gate:
+      isGroup: 0
+      groupOp: 0
+      children: []
+      attribute: 3
+      allowedMask: 1
+    rollBonus: 1
+    targetShift: 0
+    forcedDrawback: 0
+  - text: Transit/building access hurdles
+    kind: 1
+    gate:
+      isGroup: 0
+      groupOp: 0
+      children: []
+      attribute: 7
+      allowedMask: 2
+    rollBonus: 0
+    targetShift: 1
+    forcedDrawback: 0
+  - text: Language barrier on lines
+    kind: 1
+    gate:
+      isGroup: 0
+      groupOp: 0
+      children: []
+      attribute: 9
+      allowedMask: 2
+    rollBonus: -1
+    targetShift: 0
+    forcedDrawback: 0
+  - text: Community clinic priority
+    kind: 0
+    gate:
+      isGroup: 1
+      groupOp: 1
+      children:
+      - isGroup: 1
+        groupOp: 0
+        children:
+        - isGroup: 0
+          groupOp: 0
+          children: []
+          attribute: 10
+          allowedMask: 4
+        - isGroup: 0
+          groupOp: 0
+          children: []
+          attribute: 2
+          allowedMask: 1
+        attribute: 0
+        allowedMask: 0
+      - isGroup: 1
+        groupOp: 0
+        children:
+        - isGroup: 0
+          groupOp: 0
+          children: []
+          attribute: 10
+          allowedMask: 1
+        - isGroup: 0
+          groupOp: 0
+          children: []
+          attribute: 1
+          allowedMask: 1
+        attribute: 0
+        allowedMask: 0
+      attribute: 0
+      allowedMask: 0
+    rollBonus: 1
+    targetShift: 0
+    forcedDrawback: 0

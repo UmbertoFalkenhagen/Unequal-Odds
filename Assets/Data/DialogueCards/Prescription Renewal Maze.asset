@@ -13,7 +13,88 @@ MonoBehaviour:
   m_Name: Prescription Renewal Maze
   m_EditorClassIdentifier: 
   goal: 2
-  cardTitle: 'Getting a Specialist Appointment '
-  cardBody: 
-  baseTarget: 4
-  options: []
+  cardTitle: Prescription Renewal Maze
+  cardBody: The bottle rattles like a timer. The app wants another code; the clinic
+    wants a call; the chemist wants a fax from last year.
+  baseTarget: 3
+  options:
+  - text: E-prescriptions supported
+    kind: 0
+    gate:
+      isGroup: 0
+      groupOp: 0
+      children: []
+      attribute: 2
+      allowedMask: 1
+    rollBonus: 0
+    targetShift: -1
+    forcedDrawback: 0
+  - text: Pharmacies/Health Facilities are spread thin.
+    kind: 1
+    gate:
+      isGroup: 1
+      groupOp: 1
+      children:
+      - isGroup: 0
+        groupOp: 0
+        children: []
+        attribute: 3
+        allowedMask: 6
+      - isGroup: 0
+        groupOp: 0
+        children: []
+        attribute: 7
+        allowedMask: 4
+      - isGroup: 0
+        groupOp: 0
+        children: []
+        attribute: 2
+        allowedMask: 4
+      attribute: 0
+      allowedMask: 0
+    rollBonus: 0
+    targetShift: 1
+    forcedDrawback: 0
+  - text: Paperwork resets for status
+    kind: 1
+    gate:
+      isGroup: 0
+      groupOp: 0
+      children: []
+      attribute: 10
+      allowedMask: 4
+    rollBonus: 0
+    targetShift: 1
+    forcedDrawback: 0
+  - text: Fatigue from chronic condition
+    kind: 1
+    gate:
+      isGroup: 0
+      groupOp: 0
+      children: []
+      attribute: 7
+      allowedMask: 6
+    rollBonus: -1
+    targetShift: 0
+    forcedDrawback: 0
+  - text: 'Family help with forms '
+    kind: 0
+    gate:
+      isGroup: 1
+      groupOp: 1
+      children:
+      - isGroup: 0
+        groupOp: 0
+        children: []
+        attribute: 8
+        allowedMask: 6
+      - isGroup: 0
+        groupOp: 0
+        children: []
+        attribute: 1
+        allowedMask: 4
+      attribute: 8
+      allowedMask: 6
+    rollBonus: 1
+    targetShift: 0
+    forcedDrawback: 0

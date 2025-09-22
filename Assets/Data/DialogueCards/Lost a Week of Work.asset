@@ -10,66 +10,65 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f4689a5e7c501b245b37f6a7c060c140, type: 3}
-  m_Name: First-Time Therapy Intake
+  m_Name: Lost a Week of Work
   m_EditorClassIdentifier: 
-  goal: 2
-  cardTitle: First-Time Therapy Intake
-  cardBody: "The waiting room plant is too green. The clipboard questions stretch
-    past the edge of your breath. You wonder if there\u2019s a right way to say \u201Chelp.\u201D"
+  goal: 3
+  cardTitle: Lost a Week of Work
+  cardBody: 
   baseTarget: 4
   options:
-  - text: Private therapist availability
+  - text: 
     kind: 0
     gate:
       isGroup: 0
       groupOp: 0
       children: []
-      attribute: 1
-      allowedMask: 4
+      attribute: 0
+      allowedMask: 0
     rollBonus: 0
-    targetShift: -1
-    forcedDrawback: 0
-  - text: 'Shortage outside the city '
-    kind: 1
-    gate:
-      isGroup: 0
-      groupOp: 0
-      children: []
-      attribute: 3
-      allowedMask: 6
-    rollBonus: -1
     targetShift: 0
     forcedDrawback: 0
-  - text: Provider mismatch / bias
-    kind: 1
-    gate:
-      isGroup: 0
-      groupOp: 0
-      children: []
-      attribute: 5
-      allowedMask: 28
-    rollBonus: 0
-    targetShift: 1
-    forcedDrawback: 0
-  - text: Interpreter delays
-    kind: 1
-    gate:
-      isGroup: 0
-      groupOp: 0
-      children: []
-      attribute: 9
-      allowedMask: 2
-    rollBonus: 0
-    targetShift: 1
-    forcedDrawback: 0
-  - text: 'Knows where to seek support '
+  - text: 
     kind: 0
     gate:
       isGroup: 0
       groupOp: 0
       children: []
-      attribute: 8
-      allowedMask: 4
-    rollBonus: 1
+      attribute: 0
+      allowedMask: 0
+    rollBonus: 0
+    targetShift: 0
+    forcedDrawback: 0
+  - text: 
+    kind: 0
+    gate:
+      isGroup: 0
+      groupOp: 0
+      children: []
+      attribute: 0
+      allowedMask: 0
+    rollBonus: 0
+    targetShift: 0
+    forcedDrawback: 0
+  - text: 
+    kind: 0
+    gate:
+      isGroup: 0
+      groupOp: 0
+      children: []
+      attribute: 0
+      allowedMask: 0
+    rollBonus: 0
+    targetShift: 0
+    forcedDrawback: 0
+  - text: 
+    kind: 0
+    gate:
+      isGroup: 0
+      groupOp: 0
+      children: []
+      attribute: 0
+      allowedMask: 0
+    rollBonus: 0
     targetShift: 0
     forcedDrawback: 0

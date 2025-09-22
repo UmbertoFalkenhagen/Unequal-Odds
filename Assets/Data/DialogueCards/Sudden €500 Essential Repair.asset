@@ -1,0 +1,115 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4689a5e7c501b245b37f6a7c060c140, type: 3}
+  m_Name: "Sudden \u20AC500 Essential Repair"
+  m_EditorClassIdentifier: 
+  goal: 3
+  cardTitle: "Sudden \u20AC500 Essential Repair "
+  cardBody: "The fridge coughs and dies on payday minus two. A neon receipt glows
+    on the counter: \u201CEssential.\u201D Your budget is a house of cards in a breeze."
+  baseTarget: 4
+  options:
+  - text: 'Family loan '
+    kind: 0
+    gate:
+      isGroup: 1
+      groupOp: 1
+      children:
+      - isGroup: 0
+        groupOp: 0
+        children: []
+        attribute: 1
+        allowedMask: 4
+      - isGroup: 1
+        groupOp: 0
+        children:
+        - isGroup: 0
+          groupOp: 0
+          children: []
+          attribute: 1
+          allowedMask: 2
+        - isGroup: 0
+          groupOp: 0
+          children: []
+          attribute: 8
+          allowedMask: 4
+        attribute: 0
+        allowedMask: 0
+      attribute: 1
+      allowedMask: 6
+    rollBonus: 0
+    targetShift: -1
+    forcedDrawback: 0
+  - text: 'Bank overdraft access '
+    kind: 0
+    gate:
+      isGroup: 1
+      groupOp: 0
+      children:
+      - isGroup: 0
+        groupOp: 0
+        children: []
+        attribute: 2
+        allowedMask: 1
+      - isGroup: 0
+        groupOp: 0
+        children: []
+        attribute: 10
+        allowedMask: 1
+      attribute: 0
+      allowedMask: 0
+    rollBonus: 1
+    targetShift: 0
+    forcedDrawback: 0
+  - text: 'Remittance obligations '
+    kind: 1
+    gate:
+      isGroup: 0
+      groupOp: 0
+      children: []
+      attribute: 10
+      allowedMask: 2
+    rollBonus: 0
+    targetShift: 1
+    forcedDrawback: 0
+  - text: 'Income volatility '
+    kind: 1
+    gate:
+      isGroup: 1
+      groupOp: 1
+      children:
+      - isGroup: 0
+        groupOp: 0
+        children: []
+        attribute: 2
+        allowedMask: 6
+      - isGroup: 0
+        groupOp: 0
+        children: []
+        attribute: 3
+        allowedMask: 4
+      attribute: 0
+      allowedMask: 0
+    rollBonus: 0
+    targetShift: 1
+    forcedDrawback: 0
+  - text: 'Mutual-aid fund '
+    kind: 0
+    gate:
+      isGroup: 0
+      groupOp: 0
+      children: []
+      attribute: 3
+      allowedMask: 1
+    rollBonus: 1
+    targetShift: 0
+    forcedDrawback: 0
