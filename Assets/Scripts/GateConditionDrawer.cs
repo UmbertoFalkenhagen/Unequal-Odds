@@ -1,12 +1,4 @@
-// GateConditionDrawer.cs  (Editor assembly)
-// -----------------------------------------------------------------------------
-// Custom PropertyDrawer so designers can nest AND/OR groups and pick enum
-// values from a context-sensitive dropdown.
-// -----------------------------------------------------------------------------
-
 #if UNITY_EDITOR
-using System;
-using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 using UnequalOdds.GameData;
@@ -18,24 +10,67 @@ public class GateConditionDrawer : PropertyDrawer
 
     public override float GetPropertyHeight(SerializedProperty prop, GUIContent label)
     {
-        bool isGroup = prop.FindPropertyRelative("isGroup").boolValue;
-        if (!isGroup)
-            return EditorGUIUtility.singleLineHeight * 3.5f;
+        if (prop == null) return EditorGUIUtility.singleLineHeight;
 
-        // group: include children heights
+        var isGroupProp = prop.FindPropertyRelative("isGroup");
+        if (isGroupProp == null)
+            return EditorGUIUtility.singleLineHeight * 2f; // minimal help
+
+        bool isGroup = isGroupProp.boolValue;
+
+        if (!isGroup)
+        {
+            // leaf: Group toggle + attribute + (maybe) mask
+            var attrProp = prop.FindPropertyRelative("attribute");
+            float lines = 2f; // toggle + attribute
+            if (attrProp != null && (AttributeKey)attrProp.enumValueIndex != AttributeKey.None)
+                lines += 1f; // mask line
+            return EditorGUIUtility.singleLineHeight * (lines + 0.5f);
+        }
+
+        // group: Group toggle + operator + each child + +/- buttons
         var childrenProp = prop.FindPropertyRelative("children");
-        float h = EditorGUIUtility.singleLineHeight * 3; // toggles + header
-        for (int i = 0; i < childrenProp.arraySize; i++)
-            h += GetPropertyHeight(childrenProp.GetArrayElementAtIndex(i), label) + 2;
-        return h + 4;
+        float h = EditorGUIUtility.singleLineHeight * 2.5f; // toggle + op
+        if (childrenProp != null)
+        {
+            for (int i = 0; i < childrenProp.arraySize; i++)
+            {
+                var childProp = childrenProp.GetArrayElementAtIndex(i);
+                // if child is null managed ref, reserve one line for the "null child" UI
+                if (childProp == null || string.IsNullOrEmpty(childProp.managedReferenceFullTypename))
+                {
+                    h += EditorGUIUtility.singleLineHeight + 4f;
+                }
+                else
+                {
+                    // FIX: use EditorGUI.GetPropertyHeight(..., includeChildren)
+                    h += EditorGUI.GetPropertyHeight(childProp, true) + 4f;
+                }
+            }
+        }
+        h += EditorGUIUtility.singleLineHeight + 4f; // + / ? row
+        return h;
     }
 
     public override void OnGUI(Rect rect, SerializedProperty prop, GUIContent label)
     {
-        EditorGUI.BeginProperty(rect, label, prop);
-        var isGroupProp = prop.FindPropertyRelative("isGroup");
+        if (prop == null)
+        {
+            EditorGUI.HelpBox(rect, "Gate is null (no property).", MessageType.Warning);
+            return;
+        }
 
-        // ------ toggle row ------
+        EditorGUI.BeginProperty(rect, label, prop);
+
+        // line 1: group toggle
+        var isGroupProp = prop.FindPropertyRelative("isGroup");
+        if (isGroupProp == null)
+        {
+            EditorGUI.HelpBox(rect, "Gate data missing (isGroup). Try re-creating the card option.", MessageType.Warning);
+            EditorGUI.EndProperty();
+            return;
+        }
+
         Rect line = new Rect(rect.x, rect.y, rect.width, EditorGUIUtility.singleLineHeight);
         isGroupProp.boolValue = EditorGUI.ToggleLeft(line, "Group (AND/OR)", isGroupProp.boolValue);
 
@@ -47,104 +82,144 @@ public class GateConditionDrawer : PropertyDrawer
         EditorGUI.EndProperty();
     }
 
-    // ---------------------------------------------------------------------
-    private void DrawGroup(Rect rect, SerializedProperty prop, Rect headerLine)
+    // ------------------------ group node ------------------------
+    private void DrawGroup(Rect rect, SerializedProperty prop, Rect line)
     {
         var opProp = prop.FindPropertyRelative("groupOp");
         var childrenProp = prop.FindPropertyRelative("children");
 
         // operator dropdown
-        headerLine.y += EditorGUIUtility.singleLineHeight + 2;
-        EditorGUI.PropertyField(headerLine, opProp);
+        line.y += EditorGUIUtility.singleLineHeight + 2f;
+        if (opProp != null)
+            EditorGUI.PropertyField(line, opProp);
+        else
+            EditorGUI.LabelField(line, "groupOp (missing)");
 
-        // children list
-        headerLine.y += EditorGUIUtility.singleLineHeight + 4;
-        for (int i = 0; i < childrenProp.arraySize; i++)
+        // children
+        line.y += EditorGUIUtility.singleLineHeight + 4f;
+        if (childrenProp != null)
         {
-            var childProp = childrenProp.GetArrayElementAtIndex(i);
-            float h = GetPropertyHeight(childProp, GUIContent.none);
-            Rect childRect = new Rect(headerLine.x + INDENT, headerLine.y, headerLine.width - INDENT, h);
-            EditorGUI.PropertyField(childRect, childProp, GUIContent.none, true);
-            headerLine.y += h + 2;
+            for (int i = 0; i < childrenProp.arraySize; i++)
+            {
+                var childProp = childrenProp.GetArrayElementAtIndex(i);
+                float childHeight = childProp != null && !string.IsNullOrEmpty(childProp.managedReferenceFullTypename)
+                    ? EditorGUI.GetPropertyHeight(childProp, true)   // FIX here too
+                    : EditorGUIUtility.singleLineHeight;
+
+                Rect childRect = new Rect(line.x + INDENT, line.y, line.width - INDENT, childHeight);
+
+                if (childProp == null || string.IsNullOrEmpty(childProp.managedReferenceFullTypename))
+                {
+                    // Null managed reference entry: offer to create default
+                    EditorGUI.HelpBox(childRect, "Null child. Click 'Fix' to add a default gate.", MessageType.Info);
+                    Rect fixBtn = new Rect(childRect.xMax - 60f, childRect.y + 2f, 56f, EditorGUIUtility.singleLineHeight);
+                    if (GUI.Button(fixBtn, "Fix"))
+                    {
+                        EnsureChildExists(childrenProp, i);
+                    }
+                }
+                else
+                {
+                    EditorGUI.PropertyField(childRect, childProp, GUIContent.none, true);
+                }
+
+                line.y += childHeight + 4f;
+            }
         }
 
-        // + / – buttons
-        Rect plusBtn = new Rect(headerLine.x, headerLine.y, 24, EditorGUIUtility.singleLineHeight);
-        if (GUI.Button(plusBtn, "+"))
-            childrenProp.arraySize += 1;
+        // +/- buttons
+        Rect plusBtn = new Rect(line.x, line.y, 24f, EditorGUIUtility.singleLineHeight);
+        Rect minusBtn = new Rect(line.x + 28f, line.y, 24f, EditorGUIUtility.singleLineHeight);
 
-        Rect minusBtn = new Rect(headerLine.x + 28, headerLine.y, 24, EditorGUIUtility.singleLineHeight);
-        if (GUI.Button(minusBtn, "–") && childrenProp.arraySize > 0)
-            childrenProp.arraySize -= 1;
+        if (GUI.Button(plusBtn, "+"))
+        {
+            if (childrenProp != null)
+            {
+                int idx = childrenProp.arraySize;
+                childrenProp.arraySize = idx + 1;
+                EnsureChildExists(childrenProp, idx); // instantiate default GateCondition
+            }
+        }
+
+        if (GUI.Button(minusBtn, "–"))
+        {
+            if (childrenProp != null && childrenProp.arraySize > 0)
+            {
+                childrenProp.arraySize -= 1;
+            }
+        }
     }
 
-    // ---------------------------------------------------------------------
-    private void DrawLeaf(Rect rect, SerializedProperty prop, Rect headerLine)
+    private static void EnsureChildExists(SerializedProperty childrenProp, int index)
+    {
+        var child = childrenProp.GetArrayElementAtIndex(index);
+        if (child != null && string.IsNullOrEmpty(child.managedReferenceFullTypename))
+        {
+            // Assign a default instance to the managed reference slot
+            child.managedReferenceValue = new GateCondition();
+        }
+    }
+
+    // ------------------------ leaf node ------------------------
+    private void DrawLeaf(Rect rect, SerializedProperty prop, Rect line)
     {
         var attrProp = prop.FindPropertyRelative("attribute");
         var maskProp = prop.FindPropertyRelative("allowedMask");
 
         // attribute dropdown
-        headerLine.y += EditorGUIUtility.singleLineHeight + 2;
-        EditorGUI.PropertyField(headerLine, attrProp);
+        line.y += EditorGUIUtility.singleLineHeight + 2f;
+        if (attrProp != null)
+            EditorGUI.PropertyField(line, attrProp);
+        else
+            EditorGUI.LabelField(line, "attribute (missing)");
 
-        // enum mask — show if an attribute is chosen
-        if ((AttributeKey)attrProp.enumValueIndex == AttributeKey.None) return;
+        if (attrProp == null) return;
 
-        headerLine.y += EditorGUIUtility.singleLineHeight + 2;
         var key = (AttributeKey)attrProp.enumValueIndex;
+        if (key == AttributeKey.None) return;
+
+        // enum mask
+        line.y += EditorGUIUtility.singleLineHeight + 2f;
+        if (maskProp == null)
+        {
+            EditorGUI.LabelField(line, "allowedMask (missing)");
+            return;
+        }
 
         switch (key)
         {
             case AttributeKey.BirthWealth:
-                maskProp.intValue = (int)(BirthWealthClass)
-                    EditorGUI.EnumFlagsField(headerLine,
-                    (BirthWealthClass)maskProp.intValue);
+                maskProp.intValue = (int)(BirthWealthClass)EditorGUI.EnumFlagsField(line, (BirthWealthClass)maskProp.intValue);
                 break;
             case AttributeKey.CountryContext:
-                maskProp.intValue = (int)(CountryContext)
-                    EditorGUI.EnumFlagsField(headerLine,
-                    (CountryContext)maskProp.intValue);
+                maskProp.intValue = (int)(CountryContext)EditorGUI.EnumFlagsField(line, (CountryContext)maskProp.intValue);
                 break;
             case AttributeKey.Locale:
-                maskProp.intValue = (int)(Locale)
-                    EditorGUI.EnumFlagsField(headerLine,
-                    (Locale)maskProp.intValue);
+                maskProp.intValue = (int)(Locale)EditorGUI.EnumFlagsField(line, (Locale)maskProp.intValue);
                 break;
             case AttributeKey.SkinColourEthnicPos:
-                maskProp.intValue = (int)(SkinColour)
-                    EditorGUI.EnumFlagsField(headerLine,
-                    (SkinColour)maskProp.intValue);
+                maskProp.intValue = (int)(SkinColour)EditorGUI.EnumFlagsField(line, (SkinColour)maskProp.intValue);
                 break;
             case AttributeKey.GenderIdentity:
-                maskProp.intValue = (int)(GenderIdentity)
-                    EditorGUI.EnumFlagsField(headerLine,
-                    (GenderIdentity)maskProp.intValue);
+                maskProp.intValue = (int)(GenderIdentity)EditorGUI.EnumFlagsField(line, (GenderIdentity)maskProp.intValue);
                 break;
             case AttributeKey.SexualOrientation:
-                maskProp.intValue = (int)(SexualOrientation)
-                    EditorGUI.EnumFlagsField(headerLine,
-                    (SexualOrientation)maskProp.intValue);
+                maskProp.intValue = (int)(SexualOrientation)EditorGUI.EnumFlagsField(line, (SexualOrientation)maskProp.intValue);
                 break;
             case AttributeKey.DisabilityStatus:
-                maskProp.intValue = (int)(DisabilityStatus)
-                    EditorGUI.EnumFlagsField(headerLine,
-                    (DisabilityStatus)maskProp.intValue);
+                maskProp.intValue = (int)(DisabilityStatus)EditorGUI.EnumFlagsField(line, (DisabilityStatus)maskProp.intValue);
                 break;
             case AttributeKey.ParentsEducation:
-                maskProp.intValue = (int)(ParentsEducation)
-                    EditorGUI.EnumFlagsField(headerLine,
-                    (ParentsEducation)maskProp.intValue);
+                maskProp.intValue = (int)(ParentsEducation)EditorGUI.EnumFlagsField(line, (ParentsEducation)maskProp.intValue);
                 break;
             case AttributeKey.FirstLanguageAlign:
-                maskProp.intValue = (int)(FirstLanguageAlignment)
-                    EditorGUI.EnumFlagsField(headerLine,
-                    (FirstLanguageAlignment)maskProp.intValue);
+                maskProp.intValue = (int)(FirstLanguageAlignment)EditorGUI.EnumFlagsField(line, (FirstLanguageAlignment)maskProp.intValue);
                 break;
             case AttributeKey.MigrationStatus:
-                maskProp.intValue = (int)(MigrationCitizenshipStatus)
-                    EditorGUI.EnumFlagsField(headerLine,
-                    (MigrationCitizenshipStatus)maskProp.intValue);
+                maskProp.intValue = (int)(MigrationCitizenshipStatus)EditorGUI.EnumFlagsField(line, (MigrationCitizenshipStatus)maskProp.intValue);
+                break;
+            default:
+                EditorGUI.LabelField(line, key.ToString());
                 break;
         }
     }

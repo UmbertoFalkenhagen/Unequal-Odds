@@ -10,6 +10,7 @@ using UnequalOdds.Gameplay;   // PlayerProfile & enums
 
 namespace UnequalOdds.GameData
 {
+
     [CreateAssetMenu(fileName = "New Dialogue Card",
                      menuName = "Cards/Dialogue Card")]
     public class DialogueCard : ScriptableObject
@@ -20,7 +21,7 @@ namespace UnequalOdds.GameData
         [TextArea(4, 8)] public string cardBody;
 
         // ----- dice -----
-        [Range(3, 6)] public int baseTarget = 4;
+        [Range(1, 6)] public int baseTarget = 4;
 
         // ----- options -----
         public List<CardOption> options = new List<CardOption>();
@@ -32,11 +33,15 @@ namespace UnequalOdds.GameData
     {
         [TextArea(2, 3)] public string text;
 
-        public GateCondition gate = new GateCondition();   // root node
+        public OptionKind kind = OptionKind.Privilege;   // <— NEW
 
-        // dice
+        public GateCondition gate = new GateCondition();
+
         public int rollBonus = 0;
         public int targetShift = 0;
+
+        // You can keep forcedDrawback if you still need it for special cases,
+        // but it is no longer required for the “background-based disadvantage”.
         public bool forcedDrawback = false;
     }
 
@@ -100,7 +105,7 @@ namespace UnequalOdds.GameData
 
     // =======================================================================
     public enum LogicalOp { And, Or }
-
+    public enum OptionKind { Privilege, Disadvantage }
     public enum AttributeKey
     {
         None,

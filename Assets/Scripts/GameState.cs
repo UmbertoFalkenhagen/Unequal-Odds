@@ -1,5 +1,6 @@
 using UnityEngine;
-using UnequalOdds.Gameplay;   // where PlayerProfile lives
+using UnequalOdds.Gameplay;
+using System.Collections.Generic;   // where PlayerProfile lives
 
 namespace UnequalOdds.Runtime
 {
@@ -11,6 +12,8 @@ namespace UnequalOdds.Runtime
         public static GameState Instance { get; private set; }
 
         public PlayerProfile CurrentProfile { get; set; }
+        public List<TurnLogEntry> RunLog { get; } = new List<TurnLogEntry>();
+        public void ResetRunLog() => RunLog.Clear();
 
         private void Awake()
         {
