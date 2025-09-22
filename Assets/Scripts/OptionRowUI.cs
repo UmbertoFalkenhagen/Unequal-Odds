@@ -1,9 +1,9 @@
-
+// Assets/Scripts/UI/OptionRowUI.cs
 using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using UnequalOdds.GameData; // CardOption, OptionKind
+using UnequalOdds.GameData;
 
 namespace UnequalOdds.UI
 {
@@ -13,62 +13,58 @@ namespace UnequalOdds.UI
         [SerializeField] private LayoutElement spacer;     // nudge via preferredHeight
         [SerializeField] private Toggle toggle;
         [SerializeField] private TMP_Text label;
+        [SerializeField] private TMP_Text conditionText;   // shows the gate reason
         [SerializeField] private TMP_Text effectText;
         [SerializeField] private CanvasGroup rowCanvasGroup;
-        [SerializeField] private Image background;         // optional tint
+        [SerializeField] private Image background;
+        [Tooltip("Optional border image (9-sliced) for accents).")]
+        [SerializeField] private Image border;
 
-        [Header("Visuals")]
-        [Tooltip("How many pixels to nudge DOWN when not locked-in.")]
+        [Header("Layout")]
+        [Tooltip("Pixels to nudge DOWN when option is not locked-in.")]
         [SerializeField] private float notLockedYOffset = 12f;
 
-        [Tooltip("Dimmed text color for 'not my background' awareness rows.")]
-        [SerializeField] private Color passiveGrey = new Color(0.65f, 0.65f, 0.65f, 1f);
+        [Header("Palette / Backgrounds")]
+        [SerializeField] private Color bgNeutral = Hex("#1E1F23");
+        [SerializeField] private Color bgUnavailable = Hex("#2A2C31");
+        [SerializeField] private Color bgPrivOn = Hex("#136F3F");
+        [SerializeField] private Color bgPrivOff = Hex("#0F2A1A");
+        [SerializeField] private Color bgDisadvOn = Hex("#842029");
+        [SerializeField] private Color bgDisadvOff = Hex("#2A2C31");
 
-        [Tooltip("Active disadvantage background tint.")]
-        [SerializeField] private Color negActiveBg = new Color(0.35f, 0.08f, 0.08f, 1f);
+        [Header("Palette / Text")]
+        [SerializeField] private Color txtDefault = Hex("#F2F4F7");
+        [SerializeField] private Color txtPassive = Hex("#A0A3A7");
+        [SerializeField] private Color effPrivOn = Hex("#4CD08A");
+        [SerializeField] private Color effPrivOff = Hex("#89DDB5");
+        [SerializeField] private Color effDisadvOn = Hex("#FF7373");
+        [SerializeField] private Color effDisadvOff = Hex("#E79A9A");
 
-        [Tooltip("Active privilege background tint.")]
-        [SerializeField] private Color posActiveBg = new Color(0.10f, 0.30f, 0.18f, 1f);
+        [Header("Palette / Borders (optional)")]
+        [SerializeField] private Color brdPrivilege = Hex("#2ECC71");
+        [SerializeField] private Color brdDisadvantage = Hex("#FF6B6B");
+        [SerializeField] private Color brdUnavailable = Hex("#6B7280");
 
-        [Tooltip("Neutral background tint.")]
-        [SerializeField] private Color neutralBg = new Color(0.16f, 0.16f, 0.16f, 1f);
-
-        [SerializeField] private Color textDefault = new Color(0.90f, 0.90f, 0.90f, 1f);
-        [SerializeField] private Color textRed = new Color(0.90f, 0.30f, 0.30f, 1f);
-        [SerializeField] private Color textGreen = new Color(0.30f, 0.85f, 0.55f, 1f);
-
-        // Public API -----------------------------------------------------------
+        // Public API
         public CardOption Option { get; private set; }
-
-        /// <summary>True if player matches the gate (has the relevant background).</summary>
         public bool HasBackground { get; private set; }
-
-        /// <summary>True when this row actually affects target/roll (locked-in).</summary>
-        public bool Contributes => isLockedIn;
-
-        /// <summary>Compatibility with older callers. Same as Contributes.</summary>
-        public bool IsSelected => Contributes;
-
+        public bool Contributes => isLockedIn;   // contributes to dice math
+        public bool IsSelected => Contributes;   // compatibility
         public event Action OnSelectionChanged;
 
-        // Internal state -------------------------------------------------------
         private enum RowState
         {
-            DisadvantageActiveLocked,   // has background ? auto-locked, contributes
-            DisadvantageNotApplicable,  // no background  ? awareness only
-            PrivilegeAvailable,         // has background ? togglable, starts unlocked
-            PrivilegeLockedIn,          // toggled on     ? contributes
-            PrivilegeUnavailable        // no background  ? awareness only
+            DisadvantageActiveLocked,   // has bg ? applied (auto-locked)
+            DisadvantageNotApplicable,  // no bg  ? awareness only
+            PrivilegeAvailable,         // has bg ? togglable, off
+            PrivilegeLockedIn,          // has bg ? togglable, on
+            PrivilegeUnavailable        // no bg  ? awareness only
         }
 
         private RowState state;
         private bool isLockedIn;
 
-        // Setup ---------------------------------------------------------------
-        /// <summary>
-        /// Initialize visuals & behavior based on the option and whether the player
-        /// matches its gate (hasBackground).
-        /// </summary>
+        // -------------------- Setup --------------------
         public void Setup(CardOption option, bool hasBackground)
         {
             Option = option;
@@ -76,9 +72,10 @@ namespace UnequalOdds.UI
 
             if (label) label.text = option?.text ?? "(missing text)";
 
-            // baseline visuals
+            // baseline
             if (rowCanvasGroup) rowCanvasGroup.alpha = 1f;
-            if (background) background.color = neutralBg;
+            if (background) background.color = bgNeutral;
+            if (border) border.color = Color.clear;
             if (toggle)
             {
                 toggle.onValueChanged.RemoveAllListeners();
@@ -86,24 +83,16 @@ namespace UnequalOdds.UI
                 toggle.interactable = false;
             }
 
-            // Forced drawback override (non-interactable when applicable)
+            // Forced drawback (hard-lock if applicable)
             if (option != null && option.forcedDrawback)
             {
-                if (HasBackground)
-                {
-                    SetState(RowState.DisadvantageActiveLocked);
-                }
-                else
-                {
-                    SetState(RowState.DisadvantageNotApplicable);
-                }
+                if (HasBackground) SetState(RowState.DisadvantageActiveLocked);
+                else SetState(RowState.DisadvantageNotApplicable);
                 return;
             }
 
-            // Standard state machine
             if (option == null)
             {
-                // Defensive fallback: show as awareness row
                 SetState(RowState.PrivilegeUnavailable);
                 return;
             }
@@ -120,20 +109,15 @@ namespace UnequalOdds.UI
             }
         }
 
-        // External helpers ----------------------------------------------------
-        /// <summary>Enable/disable user interaction (used during outcome sequence).</summary>
         public void SetInteractable(bool interactable)
         {
-            if (!toggle) return;
-
-            // Only privileges with background are toggleable by the user.
-            if (Option != null && Option.kind == OptionKind.Privilege && HasBackground)
+            if (toggle && Option != null && Option.kind == OptionKind.Privilege && HasBackground)
                 toggle.interactable = interactable;
         }
 
         public void SetVisible(bool visible) => gameObject.SetActive(visible);
 
-        // State handling ------------------------------------------------------
+        // -------------------- State engine --------------------
         private void SetState(RowState newState)
         {
             state = newState;
@@ -142,64 +126,42 @@ namespace UnequalOdds.UI
             {
                 case RowState.DisadvantageActiveLocked:
                     isLockedIn = true;
-                    if (toggle)
-                    {
-                        toggle.isOn = true;
-                        toggle.interactable = false;
-                    }
+                    if (toggle) { toggle.isOn = true; toggle.interactable = false; }
                     MoveToLockedPosition();
-                    ApplyColors(active: true, isNegative: true, emphasizeForOthers: false);
-                    SetEffectText(textRed);
+                    ApplyTheme(bgDisadvOn, txtDefault, effDisadvOn, brdDisadvantage, alpha: 1f);
+                    SetConditionText(prefix: "Because:", tone: txtDefault);
                     break;
 
                 case RowState.DisadvantageNotApplicable:
                     isLockedIn = false;
-                    if (toggle)
-                    {
-                        toggle.isOn = false;
-                        toggle.interactable = false;
-                    }
+                    if (toggle) { toggle.isOn = false; toggle.interactable = false; }
                     MoveToNotLockedPosition();
-                    ApplyColors(active: false, isNegative: true, emphasizeForOthers: true);
-                    SetEffectText(textRed);
+                    ApplyTheme(bgDisadvOff, txtPassive, effDisadvOff, brdUnavailable, alpha: 0.6f);
+                    SetConditionText(prefix: "Not your background:", tone: txtPassive);
                     break;
 
                 case RowState.PrivilegeAvailable:
                     isLockedIn = false;
-                    if (toggle)
-                    {
-                        toggle.isOn = false;
-                        toggle.interactable = true;
-                        toggle.onValueChanged.AddListener(OnToggleChanged);
-                    }
+                    if (toggle) { toggle.isOn = false; toggle.interactable = true; toggle.onValueChanged.AddListener(OnToggleChanged); }
                     MoveToNotLockedPosition();
-                    ApplyColors(active: false, isNegative: false, emphasizeForOthers: false);
-                    SetEffectText(textDefault);
+                    ApplyTheme(bgPrivOff, txtDefault, effPrivOff, brdPrivilege, alpha: 1f);
+                    SetConditionText(prefix: "You have:", tone: effPrivOff);
                     break;
 
                 case RowState.PrivilegeLockedIn:
                     isLockedIn = true;
-                    if (toggle)
-                    {
-                        toggle.isOn = true;
-                        toggle.interactable = true; // allow turning it off again
-                        toggle.onValueChanged.AddListener(OnToggleChanged);
-                    }
+                    if (toggle) { toggle.isOn = true; toggle.interactable = true; toggle.onValueChanged.AddListener(OnToggleChanged); }
                     MoveToLockedPosition();
-                    ApplyColors(active: true, isNegative: false, emphasizeForOthers: false);
-                    SetEffectText(textGreen);
+                    ApplyTheme(bgPrivOn, txtDefault, effPrivOn, brdPrivilege, alpha: 1f);
+                    SetConditionText(prefix: "You have:", tone: effPrivOn);
                     break;
 
                 case RowState.PrivilegeUnavailable:
                     isLockedIn = false;
-                    if (toggle)
-                    {
-                        toggle.isOn = false;
-                        toggle.interactable = false;
-                    }
+                    if (toggle) { toggle.isOn = false; toggle.interactable = false; }
                     MoveToNotLockedPosition();
-                    ApplyColors(active: false, isNegative: false, emphasizeForOthers: true);
-                    SetEffectText(textGreen);
+                    ApplyTheme(bgUnavailable, txtPassive, effPrivOff, brdUnavailable, alpha: 0.6f);
+                    SetConditionText(prefix: "Requires:", tone: txtPassive);
                     break;
             }
 
@@ -208,50 +170,43 @@ namespace UnequalOdds.UI
 
         private void OnToggleChanged(bool on)
         {
-            // Only privileges can toggle
             if (Option == null || Option.kind != OptionKind.Privilege) return;
-
             if (on) SetState(RowState.PrivilegeLockedIn);
             else SetState(RowState.PrivilegeAvailable);
         }
 
-        // Visuals -------------------------------------------------------------
+        // -------------------- Visual helpers --------------------
         private void MoveToLockedPosition()
         {
-            if (spacer)
-            {
-                spacer.preferredHeight = 0f;
-                MarkForRebuild();
-            }
+            if (!spacer) return;
+            spacer.preferredHeight = 0f;
+            MarkForRebuild();
         }
 
         private void MoveToNotLockedPosition()
         {
-            if (spacer)
-            {
-                spacer.preferredHeight = Mathf.Max(0f, notLockedYOffset);
-                MarkForRebuild();
-            }
+            if (!spacer) return;
+            spacer.preferredHeight = Mathf.Max(0f, notLockedYOffset);
+            MarkForRebuild();
         }
 
-        private void ApplyColors(bool active, bool isNegative, bool emphasizeForOthers)
+        private void ApplyTheme(Color bg, Color labelColor, Color effectColor, Color borderColor, float alpha)
         {
-            // Background tint
-            if (background)
+            if (background) background.color = bg;
+            if (rowCanvasGroup) rowCanvasGroup.alpha = alpha;
+
+            if (label) label.color = labelColor;
+            if (effectText) effectText.color = effectColor;
+            if (conditionText) { /* tone set in SetConditionText */ }
+
+            if (border)
             {
-                if (active)
-                    background.color = isNegative ? negActiveBg : posActiveBg;
-                else
-                    background.color = neutralBg;
+                // If you use a 9-sliced border sprite, set its color; else leave clear
+                border.color = borderColor;
             }
 
-            // Row alpha (grey-out for “others” awareness)
-            if (rowCanvasGroup)
-                rowCanvasGroup.alpha = emphasizeForOthers ? 0.6f : 1f;
-
-            // Label color
-            if (label)
-                label.color = emphasizeForOthers ? passiveGrey : textDefault;
+            // Recompose effect text with ASCII signs to avoid missing glyphs
+            SetEffectText(effectColor);
         }
 
         private void SetEffectText(Color emphasizeColor)
@@ -259,11 +214,11 @@ namespace UnequalOdds.UI
             if (!effectText || Option == null) return;
 
             string tgt = Option.targetShift != 0
-                ? $"{(Option.targetShift > 0 ? "+" : "?")}{Mathf.Abs(Option.targetShift)} target"
+                ? $"{(Option.targetShift > 0 ? "+" : "-")}{Mathf.Abs(Option.targetShift)} target"
                 : null;
 
             string roll = Option.rollBonus != 0
-                ? $"{(Option.rollBonus > 0 ? "+" : "?")}{Mathf.Abs(Option.rollBonus)} roll"
+                ? $"{(Option.rollBonus > 0 ? "+" : "-")}{Mathf.Abs(Option.rollBonus)} roll"
                 : null;
 
             string joined = (tgt, roll) switch
@@ -274,59 +229,59 @@ namespace UnequalOdds.UI
                 _ => $"{tgt} | {roll}"
             };
 
-            if (emphasizeColor == default) emphasizeColor = textDefault;
-            string hex = ColorUtility.ToHtmlStringRGB(emphasizeColor);
-            effectText.text = $"<color=#{hex}>{joined}</color>";
+            effectText.text = joined;
+            effectText.color = emphasizeColor;
+        }
+
+        private void SetConditionText(string prefix, Color tone)
+        {
+            if (!conditionText) return;
+            string core = GateConditionUtils.ToReadable(Option?.gate);
+            conditionText.text = $"{prefix} {core}";
+            conditionText.color = tone;
         }
 
         private void MarkForRebuild()
         {
-            // Ensure the layout updates immediately
             var rt = transform as RectTransform;
             if (rt != null) LayoutRebuilder.MarkLayoutForRebuild(rt);
         }
 
-        // Editor convenience --------------------------------------------------
+        // -------------- Utilities --------------
+        private static Color Hex(string hex)
+        {
+            if (ColorUtility.TryParseHtmlString(hex, out var c)) return c;
+            return Color.magenta;
+        }
+
 #if UNITY_EDITOR
         [ContextMenu("Auto Bind Children")]
         private void AutoBindChildren()
         {
             if (!rowCanvasGroup) rowCanvasGroup = GetComponent<CanvasGroup>();
             if (!background) background = GetComponent<Image>();
+            if (!border) border = GetComponentInChildren<Image>(true) == background ? null : GetComponentInChildren<Image>(true);
 
             if (!spacer)
             {
-                // Try to find a LayoutElement named "Spacer"
                 var spacers = GetComponentsInChildren<LayoutElement>(true);
                 foreach (var s in spacers)
-                {
                     if (s.name.ToLower().Contains("spacer")) { spacer = s; break; }
-                }
                 if (!spacer && spacers.Length > 0) spacer = spacers[0];
             }
 
             if (!toggle) toggle = GetComponentInChildren<Toggle>(true);
-            if (!label)
-            {
-                var tmps = GetComponentsInChildren<TMP_Text>(true);
-                foreach (var t in tmps)
-                    if (t.name.ToLower().Contains("label")) { label = t; break; }
-                if (!label && tmps.Length > 0) label = tmps[0];
-            }
-            if (!effectText)
-            {
-                var tmps = GetComponentsInChildren<TMP_Text>(true);
-                foreach (var t in tmps)
-                    if (t.name.ToLower().Contains("effect")) { effectText = t; break; }
-                if (!effectText && tmps.Length > 1) effectText = tmps[tmps.Length - 1];
-            }
 
-            // Sanity logs
-            if (!spacer) Debug.LogWarning($"{name}: Spacer (LayoutElement) not found.");
-            if (!toggle) Debug.LogWarning($"{name}: Toggle not found.");
-            if (!label) Debug.LogWarning($"{name}: Label (TMP_Text) not found.");
-            if (!effectText) Debug.LogWarning($"{name}: EffectText (TMP_Text) not found.");
-            if (!rowCanvasGroup) Debug.LogWarning($"{name}: CanvasGroup not found.");
+            var tmps = GetComponentsInChildren<TMP_Text>(true);
+            foreach (var t in tmps)
+            {
+                string n = t.name.ToLower();
+                if (!label && n.Contains("label")) label = t;
+                else if (!effectText && n.Contains("effect")) effectText = t;
+                else if (!conditionText && (n.Contains("condition") || n.Contains("require"))) conditionText = t;
+            }
+            if (!label && tmps.Length > 0) label = tmps[0];
+            if (!effectText && tmps.Length > 1) effectText = tmps[tmps.Length - 1];
         }
 
         private void Reset() => AutoBindChildren();

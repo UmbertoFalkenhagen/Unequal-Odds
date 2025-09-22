@@ -18,7 +18,7 @@ MonoBehaviour:
     center at 9:00 AM. You need to maximize your chance of receiving the offer."
   baseTarget: 4
   options:
-  - text: Leverage an alumni referral - A warm introduction lowers the bar.
+  - text: Leverage an alumni referral
     kind: 0
     gate:
       isGroup: 1
@@ -31,50 +31,49 @@ MonoBehaviour:
     rollBonus: 0
     targetShift: -1
     forcedDrawback: 0
-  - text: Native accent & fluent forms - Reduces friction in timed assessments.
+  - text: Native accent & fluent forms
     kind: 0
     gate:
       isGroup: 0
       groupOp: 0
       children: []
       attribute: 9
-      allowedMask: 0
+      allowedMask: 1
     rollBonus: 1
     targetShift: 0
     forcedDrawback: 0
-  - text: Three-hour commute at dawn - Fatigue and uncertainty raise the requirement.
+  - text: Three-hour commute at dawn
     kind: 1
     gate:
-      isGroup: 1
+      isGroup: 0
       groupOp: 1
       children:
       - rid: 8582817961593012226
       - rid: 8582817961593012227
       attribute: 3
-      allowedMask: 2
+      allowedMask: 6
     rollBonus: 0
     targetShift: 1
     forcedDrawback: 0
-  - text: Access building without accommodation - Extra coordination time/effort
-      hurts performance.
+  - text: Access building without accommodation
     kind: 1
     gate:
       isGroup: 0
       groupOp: 0
       children: []
       attribute: 7
-      allowedMask: 2
+      allowedMask: 4
     rollBonus: -1
     targetShift: 0
     forcedDrawback: 0
-  - text: Right-to-work documents ready - No additional verification hurdles.
+  - text: Right-to-work documents ready
     kind: 0
     gate:
       isGroup: 0
       groupOp: 0
       children: []
       attribute: 10
-      allowedMask: 0
+      allowedMask: 1
     rollBonus: 0
     targetShift: -1
     forcedDrawback: 0
@@ -88,7 +87,7 @@ MonoBehaviour:
         groupOp: 0
         children: []
         attribute: 8
-        allowedMask: 2
+        allowedMask: 4
     - rid: 8582817961593012225
       type: {class: GateCondition, ns: UnequalOdds.GameData, asm: Assembly-CSharp}
       data:
@@ -96,7 +95,7 @@ MonoBehaviour:
         groupOp: 0
         children: []
         attribute: 1
-        allowedMask: 2
+        allowedMask: 4
     - rid: 8582817961593012226
       type: {class: GateCondition, ns: UnequalOdds.GameData, asm: Assembly-CSharp}
       data:

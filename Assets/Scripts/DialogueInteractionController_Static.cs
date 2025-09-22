@@ -156,6 +156,8 @@ public class DialogueInteractionController_Static : MonoBehaviour
                 bool hasBackground = opt.gate == null || opt.gate.Evaluate(profile);
                 slot.gameObject.SetActive(true);
                 slot.Setup(opt, hasBackground);
+                Debug.Log($"Gate '{opt.text}': {UnequalOdds.GameData.GateConditionUtils.ToReadable(opt.gate)} | " +
+          $"Player FL={profile.firstLang} | hasBackground={hasBackground}");
                 slot.OnSelectionChanged -= RecomputeSummary;
                 slot.OnSelectionChanged += RecomputeSummary;
             }
@@ -190,7 +192,7 @@ public class DialogueInteractionController_Static : MonoBehaviour
 
         if (Box_RollMod)
         {
-            string sign = rollMod >= 0 ? "+" : "?";
+            string sign = rollMod >= 0 ? "+" : "-";
             Box_RollMod.text = $"Roll Modifiers: {sign}{Mathf.Abs(rollMod)}";
         }
     }

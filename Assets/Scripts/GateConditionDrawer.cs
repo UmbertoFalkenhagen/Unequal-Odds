@@ -197,7 +197,7 @@ public class GateConditionDrawer : PropertyDrawer
             case AttributeKey.Locale:
                 maskProp.intValue = (int)(Locale)EditorGUI.EnumFlagsField(line, (Locale)maskProp.intValue);
                 break;
-            case AttributeKey.SkinColourEthnicPos:
+            case AttributeKey.SkinColour:
                 maskProp.intValue = (int)(SkinColour)EditorGUI.EnumFlagsField(line, (SkinColour)maskProp.intValue);
                 break;
             case AttributeKey.GenderIdentity:
@@ -212,16 +212,14 @@ public class GateConditionDrawer : PropertyDrawer
             case AttributeKey.ParentsEducation:
                 maskProp.intValue = (int)(ParentsEducation)EditorGUI.EnumFlagsField(line, (ParentsEducation)maskProp.intValue);
                 break;
-            case AttributeKey.FirstLanguageAlign:
+            case AttributeKey.FirstLanguageAlignment:
                 maskProp.intValue = (int)(FirstLanguageAlignment)EditorGUI.EnumFlagsField(line, (FirstLanguageAlignment)maskProp.intValue);
                 break;
-            case AttributeKey.MigrationStatus:
+            case AttributeKey.MigrationCitizenshipStatus:
                 maskProp.intValue = (int)(MigrationCitizenshipStatus)EditorGUI.EnumFlagsField(line, (MigrationCitizenshipStatus)maskProp.intValue);
                 break;
-            default:
-                EditorGUI.LabelField(line, key.ToString());
-                break;
         }
+
     }
 }
 #endif

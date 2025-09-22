@@ -54,52 +54,66 @@ namespace UnequalOdds.GameData
     [Serializable]
     public class GateCondition
     {
-        public bool isGroup = false;
-        public LogicalOp groupOp = LogicalOp.And;
+        public bool isGroup;
+        public LogicalOp groupOp;                   // AND / OR enum
+        public List<GateCondition> children;
 
-        [SerializeReference] public List<GateCondition> children = new List<GateCondition>();
+        public AttributeKey attribute;              // leaf attribute
+        public int allowedMask;                     // bitmask of allowed enum flags
 
-        // ----- leaf comparison fields -----
-        public AttributeKey attribute = AttributeKey.None;
-
-        // Bit-mask of acceptable enum indices (0-based). Allows multiple values.
-        // Example for BirthWealth: 001 = Low, 010 = Middle, 100 = High.
-        public int allowedMask = 0;
-
-        // ===============================================================
-        public bool Evaluate(PlayerProfile p)
+        public bool Evaluate(UnequalOdds.Gameplay.PlayerProfile p)
         {
             if (isGroup)
             {
-                if (children.Count == 0) return true;
+                if (children == null || children.Count == 0) return true;
 
-                bool result = groupOp == LogicalOp.And;
-                foreach (var child in children)
+                bool andGroup = groupOp.ToString().Equals("And", StringComparison.OrdinalIgnoreCase);
+                bool acc = andGroup ? true : false;
+
+                foreach (var c in children)
                 {
-                    bool ok = child.Evaluate(p);
-                    result = groupOp == LogicalOp.And ? result && ok : result || ok;
+                    bool v = c != null && c.Evaluate(p);
+                    acc = andGroup ? (acc && v) : (acc || v);
                 }
-                return result;
+                return acc;
             }
-
-            // ----- leaf comparison -----
-            int playerIndex = attribute switch
+            else
             {
-                AttributeKey.BirthWealth => (int)p.birthWealth,
-                AttributeKey.CountryContext => (int)p.countryContext,
-                AttributeKey.Locale => (int)p.locale,
-                AttributeKey.SkinColourEthnicPos => (int)p.skin,
-                AttributeKey.GenderIdentity => (int)p.genderIdentity,
-                AttributeKey.SexualOrientation => (int)p.sexualOrientation,
-                AttributeKey.DisabilityStatus => (int)p.disabilityStatus,
-                AttributeKey.ParentsEducation => (int)p.parentsEducation,
-                AttributeKey.FirstLanguageAlign => (int)p.firstLang,
-                AttributeKey.MigrationStatus => (int)p.migrationStatus,
-                _ => 0
-            };
+                // Treat empty leaf (no attribute selected or mask not set) as pass-through
+                if (attribute == AttributeKey.None || allowedMask == 0) return true;
 
-            int playerBit = 1 << playerIndex;
-            return (allowedMask & playerBit) != 0;      // true if mask covers player value
+                switch (attribute)
+                {
+                    case AttributeKey.BirthWealth:
+                        return MaskMatch(allowedMask, p.birthWealth);
+                    case AttributeKey.CountryContext:
+                        return MaskMatch(allowedMask, p.countryContext);
+                    case AttributeKey.Locale:
+                        return MaskMatch(allowedMask, p.locale);
+                    case AttributeKey.SkinColour:
+                        return MaskMatch(allowedMask, p.skin);                 // <-- your field
+                    case AttributeKey.GenderIdentity:
+                        return MaskMatch(allowedMask, p.genderIdentity);
+                    case AttributeKey.SexualOrientation:
+                        return MaskMatch(allowedMask, p.sexualOrientation);
+                    case AttributeKey.DisabilityStatus:
+                        return MaskMatch(allowedMask, p.disabilityStatus);
+                    case AttributeKey.ParentsEducation:
+                        return MaskMatch(allowedMask, p.parentsEducation);
+                    case AttributeKey.FirstLanguageAlignment:
+                        return MaskMatch(allowedMask, p.firstLang);            // <-- your field
+                    case AttributeKey.MigrationCitizenshipStatus:
+                        return MaskMatch(allowedMask, p.migrationStatus);
+                    default:
+                        return true;
+                }
+            }
+        }
+
+        private static bool MaskMatch<TEnum>(int mask, TEnum value) where TEnum : Enum
+        {
+            int v = Convert.ToInt32(value);
+            return (mask & v) != 0;
         }
     }
 
@@ -112,13 +126,13 @@ namespace UnequalOdds.GameData
         BirthWealth,
         CountryContext,
         Locale,
-        SkinColourEthnicPos,
+        SkinColour,
         GenderIdentity,
         SexualOrientation,
         DisabilityStatus,
         ParentsEducation,
-        FirstLanguageAlign,
-        MigrationStatus
+        FirstLanguageAlignment,
+        MigrationCitizenshipStatus
     }
 
     public enum LifeGoal

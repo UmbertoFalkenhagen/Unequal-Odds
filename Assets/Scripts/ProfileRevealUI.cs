@@ -3,20 +3,17 @@
 // Shows one button per identity attribute. When all ten are revealed, the script
 // stores the generated PlayerProfile in the GameState singleton and loads the
 // next scene.
-//
-// Place this script on an empty GameObject (e.g., “ProfileUI”) in the
-// ProfileReveal scene, and assign all ten Button references in the Inspector.
 // -----------------------------------------------------------------------------
 
+using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using UnequalOdds.GameData;
+using UnequalOdds.Runtime;   // EnumDisplayNames, ProfileFactory
 using UnequalOdds.Gameplay;
-using UnequalOdds.Runtime;
-using System.Collections;
 
 namespace UnequalOdds.UI
 {
@@ -46,35 +43,44 @@ namespace UnequalOdds.UI
         private const int totalButtons = 10;
         private bool isStarting = false;
 
+        // Handy local for formatting enum display names
+        private static string D<TEnum>(TEnum v) where TEnum : System.Enum
+            => EnumDisplayNames.ToDisplay(v);
+
         // ---------------------------------------------------------------------
         private void Awake()
         {
-            // 1. Deal a random starting profile.
+            // 1) Deal a random starting profile (all fields valid, non-zero flags).
             profile = ProfileFactory.CreateRandom();
+            ProfileFactory.EnsureValid(ref profile); // in case older saves slip in
+            if (GameState.Instance != null)
+                GameState.Instance.CurrentProfile = profile;
 
-            // 2. Wire button listeners.
-            birthWealthBtn.onClick.AddListener(() =>
-                Reveal(birthWealthBtn, profile.birthWealth.ToString()));
-            countryCtxBtn.onClick.AddListener(() =>
-                Reveal(countryCtxBtn, profile.countryContext.ToString()));
-            localeBtn.onClick.AddListener(() =>
-                Reveal(localeBtn, profile.locale.ToString()));
-            skinBtn.onClick.AddListener(() =>
-                Reveal(skinBtn, profile.skin.ToString()));
-            genderBtn.onClick.AddListener(() =>
-                Reveal(genderBtn, profile.genderIdentity.ToString()));
-            orientationBtn.onClick.AddListener(() =>
-                Reveal(orientationBtn, profile.sexualOrientation.ToString()));
-            disabilityBtn.onClick.AddListener(() =>
-                Reveal(disabilityBtn, profile.disabilityStatus.ToString()));
-            parentsEduBtn.onClick.AddListener(() =>
-                Reveal(parentsEduBtn, profile.parentsEducation.ToString()));
-            firstLangBtn.onClick.AddListener(() =>
-                Reveal(firstLangBtn, profile.firstLang.ToString()));
-            migrationBtn.onClick.AddListener(() =>
-                Reveal(migrationBtn, profile.migrationStatus.ToString()));
+            // 2) Wire button listeners with human-readable display text.
+            //    (Keep your current field names exactly as-is.)
 
-            // Start Game button setup
+            if (birthWealthBtn) birthWealthBtn.onClick.AddListener(() =>
+                Reveal(birthWealthBtn, D(profile.birthWealth)));
+            if (countryCtxBtn) countryCtxBtn.onClick.AddListener(() =>
+                Reveal(countryCtxBtn, D(profile.countryContext)));
+            if (localeBtn) localeBtn.onClick.AddListener(() =>
+                Reveal(localeBtn, D(profile.locale)));
+            if (skinBtn) skinBtn.onClick.AddListener(() =>
+                Reveal(skinBtn, D(profile.skin))); // your field name is 'skin'
+            if (genderBtn) genderBtn.onClick.AddListener(() =>
+                Reveal(genderBtn, D(profile.genderIdentity)));
+            if (orientationBtn) orientationBtn.onClick.AddListener(() =>
+                Reveal(orientationBtn, D(profile.sexualOrientation)));
+            if (disabilityBtn) disabilityBtn.onClick.AddListener(() =>
+                Reveal(disabilityBtn, D(profile.disabilityStatus)));
+            if (parentsEduBtn) parentsEduBtn.onClick.AddListener(() =>
+                Reveal(parentsEduBtn, D(profile.parentsEducation)));
+            if (firstLangBtn) firstLangBtn.onClick.AddListener(() =>
+                Reveal(firstLangBtn, D(profile.firstLang))); // your field name is 'firstLang'
+            if (migrationBtn) migrationBtn.onClick.AddListener(() =>
+                Reveal(migrationBtn, D(profile.migrationStatus)));
+
+            // 3) Start Game button setup
             if (startGameButton != null)
             {
                 startGameButton.gameObject.SetActive(false); // hidden at start
@@ -94,12 +100,15 @@ namespace UnequalOdds.UI
         /// </summary>
         private void Reveal(Button btn, string valueText)
         {
+            if (btn == null) return;
+
             // Guard: already revealed? Do nothing.
             if (revealedButtons.Contains(btn))
                 return;
 
-            // Update visuals.
-            btn.GetComponentInChildren<TextMeshProUGUI>().text = valueText;
+            // Update visuals (find the TMP child on the button)
+            var label = btn.GetComponentInChildren<TextMeshProUGUI>();
+            if (label != null) label.text = valueText;
             btn.interactable = false;
 
             // Track reveal.
@@ -135,7 +144,6 @@ namespace UnequalOdds.UI
         {
             if (startGameButton == null)
             {
-                // Fallback: no button assigned, just load.
                 SceneManager.LoadScene(coreSceneName);
                 yield break;
             }
@@ -149,9 +157,7 @@ namespace UnequalOdds.UI
                 yield return new WaitForSecondsRealtime(1f);
             }
 
-            // Optional: brief "Starting..." flash
             if (label != null) label.text = "Starting…";
-
             SceneManager.LoadScene(coreSceneName);
         }
     }
