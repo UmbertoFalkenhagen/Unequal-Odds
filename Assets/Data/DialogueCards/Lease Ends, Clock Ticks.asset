@@ -1,0 +1,95 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4689a5e7c501b245b37f6a7c060c140, type: 3}
+  m_Name: Lease Ends, Clock Ticks
+  m_EditorClassIdentifier: 
+  goal: 1
+  cardTitle: Lease Ends, Clock Ticks
+  cardBody: "Boxes loom, keys are due Friday, and the new place isn\u2019t guaranteed.
+    Your phone blinks with viewings, each an hour apart across town."
+  baseTarget: 4
+  options:
+  - text: 'Crash with family / friends '
+    kind: 0
+    gate:
+      isGroup: 1
+      groupOp: 1
+      children:
+      - isGroup: 0
+        groupOp: 0
+        children: []
+        attribute: 1
+        allowedMask: 6
+      - isGroup: 0
+        groupOp: 0
+        children: []
+        attribute: 3
+        allowedMask: 1
+      attribute: 0
+      allowedMask: 0
+    rollBonus: 0
+    targetShift: -1
+    forcedDrawback: 0
+  - text: 'Accessibility narrows choices '
+    kind: 1
+    gate:
+      isGroup: 0
+      groupOp: 0
+      children: []
+      attribute: 7
+      allowedMask: 6
+    rollBonus: 0
+    targetShift: 1
+    forcedDrawback: 0
+  - text: Employer reference on letterhead
+    kind: 0
+    gate:
+      isGroup: 0
+      groupOp: 0
+      children: []
+      attribute: 10
+      allowedMask: 1
+    rollBonus: 1
+    targetShift: 0
+    forcedDrawback: 0
+  - text: Bias on short-notice moves
+    kind: 1
+    gate:
+      isGroup: 1
+      groupOp: 1
+      children:
+      - isGroup: 0
+        groupOp: 0
+        children: []
+        attribute: 4
+        allowedMask: 2
+      - isGroup: 0
+        groupOp: 0
+        children: []
+        attribute: 9
+        allowedMask: 2
+      attribute: 0
+      allowedMask: 0
+    rollBonus: -1
+    targetShift: 0
+    forcedDrawback: 0
+  - text: Tenant hotline guidance
+    kind: 0
+    gate:
+      isGroup: 0
+      groupOp: 0
+      children: []
+      attribute: 2
+      allowedMask: 1
+    rollBonus: 1
+    targetShift: 0
+    forcedDrawback: 0

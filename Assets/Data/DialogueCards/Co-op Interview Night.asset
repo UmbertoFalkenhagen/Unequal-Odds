@@ -1,0 +1,85 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4689a5e7c501b245b37f6a7c060c140, type: 3}
+  m_Name: Co-op Interview Night
+  m_EditorClassIdentifier: 
+  goal: 1
+  cardTitle: Co-op Interview Night
+  cardBody: "A circle of folding chairs, name tags curling at the corners. \u201CTell
+    us about community.\u201D Your stomach knots as heads nod\u2014or don\u2019t."
+  baseTarget: 5
+  options:
+  - text: 'Practice with mock panels '
+    kind: 0
+    gate:
+      isGroup: 0
+      groupOp: 0
+      children: []
+      attribute: 8
+      allowedMask: 4
+    rollBonus: 1
+    targetShift: 0
+    forcedDrawback: 0
+  - text: Accent barriers in group Q&A
+    kind: 1
+    gate:
+      isGroup: 0
+      groupOp: 0
+      children: []
+      attribute: 9
+      allowedMask: 2
+    rollBonus: -1
+    targetShift: 0
+    forcedDrawback: 0
+  - text: 'Urban network for references '
+    kind: 0
+    gate:
+      isGroup: 1
+      groupOp: 0
+      children:
+      - isGroup: 0
+        groupOp: 0
+        children: []
+        attribute: 3
+        allowedMask: 1
+      - isGroup: 0
+        groupOp: 0
+        children: []
+        attribute: 2
+        allowedMask: 1
+      attribute: 0
+      allowedMask: 0
+    rollBonus: 2
+    targetShift: 0
+    forcedDrawback: 0
+  - text: Deposit requirement strain
+    kind: 1
+    gate:
+      isGroup: 0
+      groupOp: 0
+      children: []
+      attribute: 1
+      allowedMask: 1
+    rollBonus: -2
+    targetShift: 0
+    forcedDrawback: 0
+  - text: Immigration uncertainty
+    kind: 1
+    gate:
+      isGroup: 0
+      groupOp: 0
+      children: []
+      attribute: 10
+      allowedMask: 6
+    rollBonus: -1
+    targetShift: 0
+    forcedDrawback: 0
