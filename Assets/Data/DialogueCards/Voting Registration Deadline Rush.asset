@@ -14,61 +14,72 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   goal: 4
   cardTitle: Voting Registration Deadline Rush
-  cardBody: 
+  cardBody: The website stalls behind a spinning wheel. A line curls around a civic
+    office that closes in an hour.
   baseTarget: 4
   options:
-  - text: 
+  - text: 'Already registered '
     kind: 0
     gate:
       isGroup: 0
       groupOp: 0
       children: []
-      attribute: 0
-      allowedMask: 0
+      attribute: 10
+      allowedMask: 1
     rollBonus: 0
+    targetShift: -1
+    forcedDrawback: 0
+  - text: 'Office across town '
+    kind: 1
+    gate:
+      isGroup: 0
+      groupOp: 0
+      children: []
+      attribute: 3
+      allowedMask: 6
+    rollBonus: -1
     targetShift: 0
     forcedDrawback: 0
-  - text: 
+  - text: 'Forms in native language '
     kind: 0
     gate:
       isGroup: 0
       groupOp: 0
       children: []
-      attribute: 0
-      allowedMask: 0
-    rollBonus: 0
+      attribute: 9
+      allowedMask: 1
+    rollBonus: 1
     targetShift: 0
     forcedDrawback: 0
-  - text: 
-    kind: 0
+  - text: 'Instability disrupts services '
+    kind: 1
     gate:
       isGroup: 0
       groupOp: 0
       children: []
-      attribute: 0
-      allowedMask: 0
+      attribute: 2
+      allowedMask: 6
     rollBonus: 0
-    targetShift: 0
+    targetShift: 2
     forcedDrawback: 0
-  - text: 
+  - text: 'Help from advocacy group '
     kind: 0
     gate:
-      isGroup: 0
-      groupOp: 0
-      children: []
+      isGroup: 1
+      groupOp: 1
+      children:
+      - isGroup: 0
+        groupOp: 0
+        children: []
+        attribute: 2
+        allowedMask: 1
+      - isGroup: 0
+        groupOp: 0
+        children: []
+        attribute: 3
+        allowedMask: 1
       attribute: 0
       allowedMask: 0
-    rollBonus: 0
-    targetShift: 0
-    forcedDrawback: 0
-  - text: 
-    kind: 0
-    gate:
-      isGroup: 0
-      groupOp: 0
-      children: []
-      attribute: 0
-      allowedMask: 0
-    rollBonus: 0
+    rollBonus: 1
     targetShift: 0
     forcedDrawback: 0

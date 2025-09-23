@@ -14,61 +14,77 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   goal: 4
   cardTitle: Speak at City Council
-  cardBody: 
-  baseTarget: 4
+  cardBody: "Your name is called. The red light blinks alive. You grip the paper,
+    find your voice, and the room finds you back - or doesn\u2019t."
+  baseTarget: 5
   options:
-  - text: 
+  - text: 'Public speaking coach '
     kind: 0
     gate:
       isGroup: 0
       groupOp: 0
       children: []
-      attribute: 0
-      allowedMask: 0
-    rollBonus: 0
+      attribute: 8
+      allowedMask: 4
+    rollBonus: 1
     targetShift: 0
     forcedDrawback: 0
-  - text: 
+  - text: 'Time flexibility to attend '
     kind: 0
     gate:
       isGroup: 0
       groupOp: 0
       children: []
-      attribute: 0
-      allowedMask: 0
+      attribute: 1
+      allowedMask: 4
     rollBonus: 0
+    targetShift: -1
+    forcedDrawback: 0
+  - text: 'Language barrier at the mic '
+    kind: 1
+    gate:
+      isGroup: 0
+      groupOp: 0
+      children: []
+      attribute: 9
+      allowedMask: 2
+    rollBonus: -1
     targetShift: 0
     forcedDrawback: 0
-  - text: 
-    kind: 0
+  - text: Bias in chamber reception
+    kind: 1
     gate:
-      isGroup: 0
-      groupOp: 0
-      children: []
+      isGroup: 1
+      groupOp: 1
+      children:
+      - isGroup: 0
+        groupOp: 0
+        children: []
+        attribute: 4
+        allowedMask: 2
+      - isGroup: 0
+        groupOp: 0
+        children: []
+        attribute: 5
+        allowedMask: 28
+      - isGroup: 0
+        groupOp: 0
+        children: []
+        attribute: 6
+        allowedMask: 2
       attribute: 0
       allowedMask: 0
     rollBonus: 0
-    targetShift: 0
+    targetShift: 2
     forcedDrawback: 0
-  - text: 
-    kind: 0
+  - text: Accessibility hurdles in transit, building access, and the setting to speak
+    kind: 1
     gate:
       isGroup: 0
       groupOp: 0
       children: []
-      attribute: 0
-      allowedMask: 0
-    rollBonus: 0
-    targetShift: 0
-    forcedDrawback: 0
-  - text: 
-    kind: 0
-    gate:
-      isGroup: 0
-      groupOp: 0
-      children: []
-      attribute: 0
-      allowedMask: 0
-    rollBonus: 0
+      attribute: 7
+      allowedMask: 6
+    rollBonus: -1
     targetShift: 0
     forcedDrawback: 0

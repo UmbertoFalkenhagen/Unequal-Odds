@@ -14,61 +14,92 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   goal: 4
   cardTitle: 'Show Up & Be Heard '
-  cardBody: 
-  baseTarget: 4
+  cardBody: 'A notice on the door, a buzz in the feed: vote tonight, speak now. The
+    hall lights hum; the mic smells like metal.'
+  baseTarget: 3
   options:
-  - text: 
+  - text: Not an Eligible voter
+    kind: 1
+    gate:
+      isGroup: 0
+      groupOp: 0
+      children: []
+      attribute: 10
+      allowedMask: 6
+    rollBonus: 0
+    targetShift: 2
+    forcedDrawback: 0
+  - text: 'Reliable transit to venue '
     kind: 0
     gate:
       isGroup: 0
       groupOp: 0
       children: []
-      attribute: 0
-      allowedMask: 0
-    rollBonus: 0
+      attribute: 3
+      allowedMask: 1
+    rollBonus: 1
     targetShift: 0
     forcedDrawback: 0
-  - text: 
-    kind: 0
+  - text: 'Shift work / no PTO '
+    kind: 1
+    gate:
+      isGroup: 1
+      groupOp: 1
+      children:
+      - isGroup: 0
+        groupOp: 0
+        children: []
+        attribute: 1
+        allowedMask: 1
+      - isGroup: 0
+        groupOp: 0
+        children: []
+        attribute: 10
+        allowedMask: 2
+      attribute: 1
+      allowedMask: 1
+    rollBonus: 0
+    targetShift: 1
+    forcedDrawback: 0
+  - text: 'Security concerns / unrest '
+    kind: 1
     gate:
       isGroup: 0
       groupOp: 0
       children: []
-      attribute: 0
-      allowedMask: 0
-    rollBonus: 0
+      attribute: 2
+      allowedMask: 6
+    rollBonus: -1
     targetShift: 0
     forcedDrawback: 0
-  - text: 
+  - text: Mentoring in civic rights
     kind: 0
     gate:
-      isGroup: 0
-      groupOp: 0
-      children: []
+      isGroup: 1
+      groupOp: 1
+      children:
+      - isGroup: 0
+        groupOp: 0
+        children: []
+        attribute: 8
+        allowedMask: 4
+      - isGroup: 1
+        groupOp: 0
+        children:
+        - isGroup: 0
+          groupOp: 0
+          children: []
+          attribute: 2
+          allowedMask: 1
+        - isGroup: 0
+          groupOp: 0
+          children: []
+          attribute: 8
+          allowedMask: 3
+        attribute: 0
+        allowedMask: 0
       attribute: 0
       allowedMask: 0
-    rollBonus: 0
-    targetShift: 0
-    forcedDrawback: 0
-  - text: 
-    kind: 0
-    gate:
-      isGroup: 0
-      groupOp: 0
-      children: []
-      attribute: 0
-      allowedMask: 0
-    rollBonus: 0
-    targetShift: 0
-    forcedDrawback: 0
-  - text: 
-    kind: 0
-    gate:
-      isGroup: 0
-      groupOp: 0
-      children: []
-      attribute: 0
-      allowedMask: 0
-    rollBonus: 0
+    rollBonus: 1
     targetShift: 0
     forcedDrawback: 0
