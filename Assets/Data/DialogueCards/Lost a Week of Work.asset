@@ -14,61 +14,72 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   goal: 3
   cardTitle: Lost a Week of Work
-  cardBody: 
-  baseTarget: 4
+  cardBody: "It was a short illness yet work only pays for worked hours; five days
+    evaporate. Rent hasn\u2019t heard the news."
+  baseTarget: 5
   options:
-  - text: 
+  - text: Family safety net
     kind: 0
     gate:
       isGroup: 0
       groupOp: 0
       children: []
-      attribute: 0
-      allowedMask: 0
+      attribute: 1
+      allowedMask: 6
     rollBonus: 0
+    targetShift: -1
+    forcedDrawback: 0
+  - text: 'Civic benefits apply '
+    kind: 0
+    gate:
+      isGroup: 1
+      groupOp: 0
+      children:
+      - isGroup: 0
+        groupOp: 0
+        children: []
+        attribute: 2
+        allowedMask: 1
+      - isGroup: 0
+        groupOp: 0
+        children: []
+        attribute: 10
+        allowedMask: 1
+      attribute: 2
+      allowedMask: 1
+    rollBonus: 1
     targetShift: 0
     forcedDrawback: 0
-  - text: 
-    kind: 0
+  - text: 'Gig market instability '
+    kind: 1
     gate:
       isGroup: 0
       groupOp: 0
       children: []
-      attribute: 0
-      allowedMask: 0
+      attribute: 3
+      allowedMask: 6
     rollBonus: 0
+    targetShift: 1
+    forcedDrawback: 0
+  - text: 'Mobility limits extra shifts '
+    kind: 1
+    gate:
+      isGroup: 0
+      groupOp: 0
+      children: []
+      attribute: 7
+      allowedMask: 4
+    rollBonus: -1
     targetShift: 0
     forcedDrawback: 0
-  - text: 
+  - text: 'Neighborhood support network '
     kind: 0
     gate:
       isGroup: 0
       groupOp: 0
       children: []
-      attribute: 0
-      allowedMask: 0
-    rollBonus: 0
-    targetShift: 0
-    forcedDrawback: 0
-  - text: 
-    kind: 0
-    gate:
-      isGroup: 0
-      groupOp: 0
-      children: []
-      attribute: 0
-      allowedMask: 0
-    rollBonus: 0
-    targetShift: 0
-    forcedDrawback: 0
-  - text: 
-    kind: 0
-    gate:
-      isGroup: 0
-      groupOp: 0
-      children: []
-      attribute: 0
-      allowedMask: 0
-    rollBonus: 0
+      attribute: 3
+      allowedMask: 6
+    rollBonus: 1
     targetShift: 0
     forcedDrawback: 0
